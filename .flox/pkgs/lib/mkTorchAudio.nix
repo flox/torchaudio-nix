@@ -14,7 +14,11 @@
 #   pytorchNixRoot:  Path to sibling pytorch-nix repo (default ../../../../pytorch-nix)
 
 { taVersion, pythonVersion, backend, sm ? null, isa ? null, cudaVersion ? null
-, pytorchNixRoot ? ../../../../pytorch-nix }:
+  # Absolute path to the sibling pytorch-nix checkout. See the same
+  # comment in torchvision-nix/.flox/pkgs/lib/mkTorchAudio.nix counterpart
+  # for the rationale: `flox build` copies sources into /nix/store, breaking
+  # the relative sibling-path assumption.
+, pytorchNixRoot ? /home/daedalus/dev/builds/pytorch-nix }:
 
 let
   # ── Lookup tables ─────────────────────────────────────────────────────
