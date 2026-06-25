@@ -48,14 +48,12 @@ in {
                 fetchSubmodules = true;
               };
               patches = [];
-              # Soften strict `--replace-fail` to `--replace-warn`, and
-              # neutralize `rm cmake/Modules/FindCUDAToolkit.cmake` (mirrors
-              # the pytorch-nix fix — harmless if the line isn't present).
+              # Soften strict `--replace-fail` (and legacy `--replace`) to
+              # `--replace-warn` so upstream pattern changes don't fail the
+              # build.
               postPatch = builtins.replaceStrings
-                [ "--replace-fail " "--replace "
-                  "rm cmake/Modules/FindCUDAToolkit.cmake" ]
-                [ "--replace-warn "  "--replace-warn "
-                  ": # upstream rm cmake/Modules/FindCUDAToolkit.cmake (kept for 2.12 install rule)" ]
+                [ "--replace-fail " "--replace " ]
+                [ "--replace-warn "  "--replace-warn " ]
                 (oldAttrs.postPatch or "");
             });
           };
