@@ -14,11 +14,19 @@
 #   pytorchNixRoot:  Path to sibling pytorch-nix repo (default ../../../../pytorch-nix)
 
 { taVersion, pythonVersion, backend, sm ? null, isa ? null, cudaVersion ? null
-  # Absolute path to the sibling pytorch-nix checkout. See the same
-  # comment in torchvision-nix/.flox/pkgs/lib/mkTorchAudio.nix counterpart
-  # for the rationale: `flox build` copies sources into /nix/store, breaking
-  # the relative sibling-path assumption.
-, pytorchNixRoot ? /home/daedalus/dev/builds/pytorch-nix }:
+  # Source for the matching pytorch-nix wrapper. Defaults to a content-
+  # addressed builtins.fetchTarball of the upstream barstoolbluz/pytorch-nix
+  # repo at a pinned revision — works under flox build (which copies our
+  # source into /nix/store before evaluation), works on any machine, and
+  # doesn't pull the local .git into the store.
+  #
+  # To develop against an unpushed local working tree, override with a
+  # local path: `pytorchNixRoot = /home/you/dev/pytorch-nix`.
+, pytorchNixRoot ? builtins.fetchTarball {
+    url = "https://github.com/barstoolbluz/pytorch-nix/archive/08d70e562a5a2c551352425bce7c1f8d2bf59d38.tar.gz";
+    sha256 = "1b8ja70554905hgvm8y8lzh8ajbq3adkbrsz9lb13bjlq8012pf6";
+  }
+}:
 
 let
   # ── Lookup tables ─────────────────────────────────────────────────────
