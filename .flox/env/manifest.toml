@@ -1,0 +1,109 @@
+## Flox Environment Manifest -----------------------------------------
+##
+##   _Everything_ you need to know about the _manifest_ is here:
+##
+##   https://flox.dev/docs/reference/command-reference/manifest.toml/
+##
+## -------------------------------------------------------------------
+# Flox manifest version managed by Flox CLI
+schema-version = "1.12.0"
+
+
+## Install Packages --------------------------------------------------
+##  $ flox install gum  <- puts a package in [install] section below
+##  $ flox search gum   <- search for a package
+##  $ flox show gum     <- show all versions of a package
+## -------------------------------------------------------------------
+[install]
+# Build tools for PyTorch
+git.pkg-path = "git"
+git.outputs = "all"
+gcc.pkg-path = "gcc"
+gcc.outputs = "all"
+gcc-unwrapped.pkg-path = "gcc-unwrapped"
+gcc-unwrapped.priority = 6
+gcc-unwrapped.outputs = "all"
+
+
+## Environment Variables ---------------------------------------------
+##  ... available for use in the activated environment
+##      as well as [hook], [profile] scripts and [services] below.
+## -------------------------------------------------------------------
+[vars]
+
+
+## Activation Hook ---------------------------------------------------
+##  ... run by _bash_ shell when you run 'flox activate'.
+## -------------------------------------------------------------------
+[hook]
+on-activate = '''
+
+echo ""
+echo "PyTorch Build Environment (parametric builder)"
+echo ""
+echo "All PyTorch versions (2.8, 2.9, 2.10) and Python versions (3.11, 3.12, 3.13)"
+echo "are available from this single branch via parametric builders."
+echo ""
+echo "Quick start examples:"
+echo ""
+echo "  PyTorch 2.8 (stable, CUDA 12.8):"
+echo "    flox build pytorch28-python313-cuda12_8-sm90-avx512       # H100"
+echo "    flox build pytorch28-python311-cuda12_8-sm86-avx2         # RTX 3090"
+echo "    flox build pytorch28-python313-cpu-avx2                   # CPU-only"
+echo ""
+echo "  PyTorch 2.9 (recommended, multi-CUDA):"
+echo "    flox build pytorch29-python313-cuda12_9-sm90-avx512       # H100, CUDA 12.9"
+echo "    flox build pytorch29-python313-cuda13_0-sm103-avx512      # B300, CUDA 13.0"
+echo "    flox build pytorch29-python311-cuda12_8-sm90-avx512       # vLLM 0.14.x compat"
+echo ""
+echo "  PyTorch 2.10 (bleeding-edge, CUDA 13.x):"
+echo "    flox build pytorch210-python313-cuda13_0-sm90-avx512      # H100, CUDA 13.0"
+echo "    flox build pytorch210-python313-cuda13_1-sm121-avx512     # Vera Rubin Ultra"
+echo "    flox build pytorch210-python313-cuda13_0-sm110-armv9      # DRIVE Thor"
+echo ""
+echo "  Apple Silicon:"
+echo "    flox build pytorch29-python313-darwin-mps"
+echo ""
+echo "Docs: docs/pytorch-2.8.md | docs/pytorch-2.9.md | docs/pytorch-2.10.md"
+echo ""
+'''
+
+
+## Profile script ----------------------------------------------------
+## ... sourced by _your shell_ when you run 'flox activate'.
+## -------------------------------------------------------------------
+[profile]
+
+
+## Services ---------------------------------------------------------
+##  $ flox services start             <- Starts all services
+##  $ flox services status            <- Status of running services
+##  $ flox activate --start-services  <- Activates & starts all
+## ------------------------------------------------------------------
+[services]
+
+
+## Include ----------------------------------------------------------
+## ... environments to create a composed environment
+## ------------------------------------------------------------------
+[include]
+
+
+## Build and publish your own packages ------------------------------
+##  $ flox build
+##  $ flox publish
+## ------------------------------------------------------------------
+[build]
+
+
+## Other Environment Options -----------------------------------------
+[options]
+# Systems that environment is compatible with
+systems = [
+  "aarch64-darwin",
+  "aarch64-linux",
+  "x86_64-darwin",
+  "x86_64-linux",
+]
+# GPU builds (CUDA) are Linux-only
+# Darwin variants use MPS (Apple Silicon) or CPU-only (Intel Mac)
