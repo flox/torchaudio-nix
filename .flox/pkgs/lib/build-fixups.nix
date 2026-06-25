@@ -48,10 +48,12 @@ in {
                 fetchSubmodules = true;
               };
               patches = [];
-              # Soften strict `--replace` to `--replace-warn` so postPatch
-              # substitutions don't fail when upstream changes the pattern.
+              # Soften strict `--replace-fail` (and legacy `--replace`) to
+              # `--replace-warn` so postPatch substitutions don't fail when
+              # upstream changes the pattern being matched.
               postPatch = builtins.replaceStrings
-                [ "--replace " ] [ "--replace-warn " ]
+                [ "--replace-fail " "--replace " ]
+                [ "--replace-warn "  "--replace-warn " ]
                 (oldAttrs.postPatch or "");
             });
           };
