@@ -75,10 +75,29 @@ in {
 
   # ── Extra preConfigure shell ────────────────────────────────────────
   extraPreConfigure =
-    if hasSourceOverride then ''
+    (if hasSourceOverride then ''
       export BUILD_VERSION=${sourceOverride.version}
       echo "${sourceOverride.version}" > version.txt
-    '' else "";
+    '' else "")
+    +
+    # Bypass torch.utils.cpp_extension._check_cuda_version's strict
+    # gcc-vs-CUDA-max check. nixpkgs ships gcc 14.3.0; CUDA 12.9's nominal
+    # max is gcc 13.x, but it works correctly with gcc 14 in practice
+    # (pytorch itself builds clean on the same toolchain). Inject a
+    # sitecustomize.py via PYTHONPATH that monkey-patches the check to a
+    # no-op before torchaudio's setup.py imports torch.
+    ''
+      mkdir -p $TMPDIR/torch-monkey
+      cat > $TMPDIR/torch-monkey/sitecustomize.py << 'EOF'
+import warnings
+try:
+    import torch.utils.cpp_extension as _ce
+    _ce._check_cuda_version = lambda *a, **k: None
+except Exception as e:
+    warnings.warn(f"torch monkey-patch (skip _check_cuda_version) failed: {e}")
+EOF
+      export PYTHONPATH="$TMPDIR/torch-monkey:''${PYTHONPATH:-}"
+    '';
 
   # ── Whether to clear patches ────────────────────────────────────────
   clearPatches = hasSourceOverride;
