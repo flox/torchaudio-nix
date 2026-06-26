@@ -14,6 +14,11 @@
 #   pytorchNixRoot:  Path to sibling pytorch-nix repo (default ../../../../pytorch-nix)
 
 { taVersion, pythonVersion, backend, sm ? null, isa ? null, cudaVersion ? null
+  # Optional torch-pairing variant. When set (e.g. "pt212"), the metadata
+  # key becomes "${taVersion}-${ptVariant}-${pythonVersion}" so a single
+  # torchaudio version can be built against multiple torch versions. Used
+  # to produce a torchaudio 2.11.0 binary linked against torch 2.12.1.
+, ptVariant ? null
   # Source for the matching pytorch-nix wrapper. Defaults to a content-
   # addressed builtins.fetchTarball of the upstream barstoolbluz/pytorch-nix
   # repo at a pinned revision — works under flox build (which copies our
@@ -36,7 +41,10 @@ let
   taMetas   = import ./torchaudio-metadata.nix;
 
   # ── Resolve configuration ────────────────────────────────────────────
-  metaKey   = "${taVersion}-${pythonVersion}";
+  metaKey   =
+    if ptVariant != null
+    then "${taVersion}-${ptVariant}-${pythonVersion}"
+    else "${taVersion}-${pythonVersion}";
   taConfig  = taMetas.${metaKey};
 
   # ── Backend flags ────────────────────────────────────────────────────
@@ -60,10 +68,14 @@ let
 
   # ── Variant naming ──────────────────────────────────────────────────
   taVerShort = builtins.replaceStrings [ "." ] [ "" ] taVersion;
+  # Append "-${ptVariant}" when set, so torchaudio211 and
+  # torchaudio211-pt212 are distinct derivations.
+  pnameTaPart = "torchaudio${taVerShort}" +
+    (if ptVariant != null then "-${ptVariant}" else "");
   pname =
-    if isCuda   then "torchaudio${taVerShort}-python${pythonVersion}-cuda${cudaVersion}-sm${sm}-${isa}"
-    else if isCpu  then "torchaudio${taVerShort}-python${pythonVersion}-cpu-${isa}"
-    else "torchaudio${taVerShort}-python${pythonVersion}-darwin-mps";
+    if isCuda   then "${pnameTaPart}-python${pythonVersion}-cuda${cudaVersion}-sm${sm}-${isa}"
+    else if isCpu  then "${pnameTaPart}-python${pythonVersion}-cpu-${isa}"
+    else "${pnameTaPart}-python${pythonVersion}-darwin-mps";
 
   # ── Matching pytorch-nix wrapper name ──────────────────────────────
   ptVerShort = builtins.replaceStrings [ "." ] [ "" ]

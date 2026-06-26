@@ -53,4 +53,29 @@
     };
     cpuPin = "6a030d535719c5190187c4cec156f335e95e3211";
   };
+
+  # ── TorchAudio 2.11.x linked against PyTorch 2.12.x ─────────────────
+  # Upstream pytorch/audio v2.11.0 release notes state it's "compatible
+  # with future versions of torch" and no v2.12 audio release exists.
+  # This entry produces the same torchaudio 2.11.0 binary linked against
+  # the torch 2.12.1 ABI so it can be loaded alongside torchvision 0.27.x.
+  "2.11-pt212-313" = {
+    taVersion = "2.11.0";
+    ptVersion = "2.12.1";
+    nixpkgsPin = "0182a361324364ae3f436a63005877674cf45efb";
+    pythonAttr = "python3Packages";
+    sourceOverride = {
+      version = "2.11.0";
+      owner = "pytorch";
+      repo  = "audio";
+      rev   = "v2.11.0";
+      hash  = "sha256-TncROn9wfn5HOaIvupS2/KD9JCgwfHyfnbZRc+SiqJ0=";
+    };
+    cudaVersions = [ "12_8" "12_9" "13_0" "13_1" ];
+    cudaPinOverrides = {
+      "13_0" = "6a030d535719c5190187c4cec156f335e95e3211";
+      "13_1" = "2017d6d515f8a7b289fe06d3a880a7ec588c3900";
+    };
+    cpuPin = "6a030d535719c5190187c4cec156f335e95e3211";
+  };
 }
